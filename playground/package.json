@@ -1,0 +1,20 @@
+{
+  "name": "uora-playground",
+  "private": true,
+  "scripts": {
+    "build": "uora build",
+    "dev": "uora dev",
+    "routes": "uora routes",
+    "start": "uora start"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.17",
+    "@types/react-dom": "^18.2.7",
+    "@uora/cli": "workspace:*",
+    "uorajs": "workspace:*"
+  }
+}

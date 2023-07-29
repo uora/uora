@@ -1,0 +1,55 @@
+{
+  "name": "create-uora",
+  "version": "0.0.0-alpha.0",
+  "description": "uora",
+  "keywords": [
+    "uora"
+  ],
+  "homepage": "https://uora.io",
+  "bugs": {
+    "url": "https://github.com/uora/uora/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uora/uora.git",
+    "directory": "packages/create-uora"
+  },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "create-uora": "dist/index.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "pnpm build --watch",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "fs-extra": "^11.1.1",
+    "picocolors": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.1"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": "^14.18.0 || >=16.10.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "authors": [
+    "Zack <lorenx@163.com> (https://github.com/loyep)"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "automerge": false,
+  "extends": ["config:base", "group:allNonMajor", ":semanticCommitTypeAll(chore)"],
+  "meteor": {
+    "enabled": false
+  },
+  "labels": ["dependencies"],
+  "ignorePaths": ["**/fixtures/**", "**/examples/**"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["node", "pnpm", "@types/node"],
+      "groupName": "engines",
+      "enabled": false
+    },
+    {
+      "groupName": "React",
+      "matchPackageNames": ["react", "react-dom", "react-is", "react-test-renderer"]
+    },
+    {
+      "groupName": "node",
+      "matchPackageNames": ["node"],
+      "enabled": false
+    },
+    {
+      "groupName": "Playwright",
+      "matchPackageNames": ["playwright", "@playwright/test", "mcr.microsoft.com/playwright"]
+    },
+    {
+      "groupName": "examples",
+      "matchPaths": ["examples/**/package.json"],
+      "enabled": false
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": false
+    },
+    {
+      "matchDepTypes": ["engines", "@types/node"],
+      "enabled": false
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+node_modules
+dist
+.cache
+*.d.ts
+fixtures
+*.md
+*.yaml
+*.less
+.turbo
+**/__temp__/**
+tests/**/out/**
+pnpm-lock.yaml
+coverage/**
+.vitepress/cache

@@ -1,0 +1,49 @@
+name: PNPM
+
+description: Install Node.js with pnpm global cache
+
+inputs:
+  node-version:
+    default: '16'
+    description: Node.js version
+    required: false
+  save-if:
+    default: 'true'
+    description: Save cache if it was created
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Install node@${{ inputs.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2
+
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+    - name: Restore pnpm cache
+      id: restore
+      uses: actions/cache/restore@v3
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: node-cache-${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          node-cache-${{ runner.os }}-pnpm-
+
+    - name: Install pnpm dependencies
+      shell: bash
+      run: pnpm install --no-frozen-lockfile
+
+    - name: Save pnpm cache
+      uses: actions/cache/save@v3
+      if: ${{ inputs.save-if == 'true' && steps.restore.outputs.cache-hit != 'true' }}
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: node-cache-${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}

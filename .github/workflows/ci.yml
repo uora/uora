@@ -1,0 +1,77 @@
+name: CI
+
+env:
+  NODE_OPTIONS: --max-old-space-size=6144
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: uora
+  FORCE_COLOR: true
+
+on:
+  push:
+    paths-ignore:
+      - 'examples/**'
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+    types:
+      - 'opened'
+      - 'synchronize'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-swc:
+    permissions:
+      checks: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-apple-darwin
+    uses: ./.github/workflows/reusable-build.yml
+    with:
+      target: ${{ matrix.target }}
+
+  build:
+    name: 'Build: Node@${{ matrix.node-version }}'
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+    needs:
+      - build-swc
+    strategy:
+      matrix:
+        node-version: ['16']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: swc
+          path: packages/swc/dist
+
+      - name: Setup PNPM
+        uses: ./.github/actions/pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Show Build Artifacts
+        run: pnpm run bootstrap
+
+      - name: Build Packages
+        run: pnpm run build
+
+      - name: Test
+        run: pnpm run test
+        env:
+          CI: true
+          NODE_ENV: test

@@ -1,0 +1,15 @@
+{
+  "exclude": ["**/dist/**"],
+  "include": ["."],
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "commonjs",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "strict": true,
+    "jsx": "preserve",
+    "paths": {}
+  }
+}

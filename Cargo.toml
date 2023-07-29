@@ -1,0 +1,25 @@
+[workspace]
+members  = ["packages/swc/crates/*"]
+resolver = "2"                       # See https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2
+
+[workspace.dependencies]
+# Workspace crates
+napi        = { version = ">=2.13.2" }
+napi-build  = { version = ">=2.0.1" }
+napi-derive = { version = ">=2.13.0" }
+napi-sys    = { version = ">=2.2.3" }
+
+# SWC crates
+# Keep consistent with preset_env_base through swc_core
+swc_core = { version = ">=0.79.33" }
+
+[profile.dev]
+debug       = 2
+incremental = true
+
+[profile.release]
+codegen-units = 1
+debug         = false
+lto           = false # disabled by now, because it will significantly increase our compile time.
+opt-level     = 3
+strip         = true

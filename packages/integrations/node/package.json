@@ -1,0 +1,57 @@
+{
+  "name": "@uora/node",
+  "version": "0.0.0-alpha.0",
+  "description": "uora",
+  "keywords": [
+    "uora"
+  ],
+  "homepage": "https://uora.io",
+  "bugs": {
+    "url": "https://github.com/uora/uora/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uora/uora.git",
+    "directory": "packages/integrations/node"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "pnpm build --watch",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4"
+  },
+  "peerDependencies": {
+    "vue": ">=3.2.0"
+  },
+  "peerDependenciesMeta": {
+    "vue": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": "^14.19.0 || >=16.10.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "authors": [
+    "Zack <lorenx@163.com> (https://github.com/loyep)"
+  ]
+}

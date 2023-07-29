@@ -1,0 +1,13 @@
+{
+  "name": "uora-docs",
+  "module": "esnext",
+  "scripts": {
+    "build": "vitepress build",
+    "dev": "vitepress dev",
+    "preview": "vitepress preview"
+  },
+  "dependencies": {
+    "vitepress": "1.0.0-beta.7",
+    "vue": "^3.3.4"
+  }
+}

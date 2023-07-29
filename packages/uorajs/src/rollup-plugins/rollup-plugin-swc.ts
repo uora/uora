@@ -1,0 +1,197 @@
+import createDeepMerge from '@fastify/deepmerge'
+
+import { createFilter, type FilterPattern } from '@rollup/pluginutils'
+import {
+  minify as swcMinify,
+  transform as swcTransform,
+  type JscTarget,
+  type JsMinifyOptions,
+  type Options as SwcOptions,
+} from '@swc/core'
+import fs, { promises as fsp } from 'fs'
+import { getTsconfig, parseTsconfig, type TsConfigJson } from 'get-tsconfig'
+import path, { dirname, extname, join, resolve } from 'pathe'
+import type { Plugin as RollupPlugin } from 'rollup'
+import { Plugin } from 'vite'
+
+const cache = new Map<string, TsConfigJson.CompilerOptions>()
+
+export const getOptions = (cwd: string, tsconfig?: string) => {
+  const cacheKey = `${cwd}:${tsconfig ?? 'undefined'}`
+
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey) ?? {}
+  }
+
+  if (tsconfig && path.isAbsolute(tsconfig)) {
+    const compilerOptions = parseTsconfig(tsconfig).compilerOptions ?? {}
+    cache.set(cacheKey, compilerOptions)
+    return compilerOptions
+  }
+
+  let result = getTsconfig(cwd, tsconfig || 'tsconfig.json')
+  // Only fallback to `jsconfig.json` when tsconfig can not be resolved AND custom tsconfig filename is not provided
+  if (!result && !tsconfig) {
+    result = getTsconfig(cwd, 'jsconfig.json')
+  }
+
+  const compilerOptions = result?.config.compilerOptions ?? {}
+  cache.set(cacheKey, compilerOptions)
+  return compilerOptions
+}
+export type PluginOptions = {
+  include?: FilterPattern
+  exclude?: FilterPattern
+  extensions?: string[] | undefined
+  /**
+   * Use given tsconfig file instead
+   * Disable it by setting to `false`
+   */
+  tsconfig?: string | false | undefined
+} & Omit<SwcOptions, 'filename' | 'include' | 'exclude'>
+
+const INCLUDE_REGEXP = /\.[mc]?[jt]sx?$/
+const EXCLUDE_REGEXP = /node_modules/
+
+const ACCEPTED_EXTENSIONS = ['.ts', '.tsx', '.mjs', '.js', '.cjs', '.jsx']
+
+const deepmerge = createDeepMerge({
+  all: true,
+  mergeArray: (o) => (_, source) => o.clone(source),
+})
+
+const fileExists = (path: string) =>
+  fsp
+    .access(path, fs.constants.F_OK)
+    .then(() => true)
+    .catch(() => false)
+
+export function rollupPluginSwc(options: PluginOptions = {}): Plugin {
+  const filter = createFilter(options.include || INCLUDE_REGEXP, options.exclude || EXCLUDE_REGEXP)
+
+  const extensions = options.extensions || ACCEPTED_EXTENSIONS
+
+  const resolveFile = async (resolved: string, index = false) => {
+    const fileWithoutExt = resolved.replace(INCLUDE_REGEXP, '')
+
+    for (const ext of extensions) {
+      const file = index ? join(resolved, `index${ext}`) : `${fileWithoutExt}${ext}`
+      // We only check one file at a time, and we can return early
+      // eslint-disable-next-line no-await-in-loop
+      if (await fileExists(file)) return file
+    }
+    return null
+  }
+
+  return {
+    name: 'swc',
+
+    async resolveId(importee, importer) {
+      // ignore IDs with null character, these belong to other plugins
+      if (importee.startsWith('\0')) {
+        return null
+      }
+
+      if (importer && importee[0] === '.') {
+        const resolved = resolve(importer ? dirname(importer) : process.cwd(), importee)
+
+        let file = await resolveFile(resolved)
+        if (file) return file
+        if (!file && (await fileExists(resolved)) && (await fsp.stat(resolved)).isDirectory()) {
+          file = await resolveFile(resolved, true)
+          if (file) return file
+        }
+      }
+    },
+
+    async transform(code: string, id: string) {
+      if (!filter(id)) {
+        return null
+      }
+
+      const ext = extname(id)
+      if (!extensions.includes(ext)) return null
+
+      const isTypeScript = ext === '.ts' || ext === '.mts' || ext === '.cts' || ext === '.tsx'
+      const isTsx = ext === '.tsx'
+      const isJsx = ext === '.jsx'
+
+      const tsconfigOptions = options.tsconfig === false ? {} : getOptions(dirname(id), options.tsconfig)
+
+      // TODO: SWC is about to add "preserve" jsx
+      // https://github.com/swc-project/swc/pull/5661
+      // Respect "preserve" after swc adds the support
+      const useReact17NewTransform = tsconfigOptions.jsx === 'react-jsx' || tsconfigOptions.jsx === 'react-jsxdev'
+
+      const swcOptionsFromTsConfig: SwcOptions = {
+        jsc: {
+          externalHelpers: tsconfigOptions.importHelpers,
+          parser: {
+            syntax: isTypeScript ? 'typescript' : 'ecmascript',
+            tsx: isTypeScript ? isTsx : undefined,
+            jsx: !isTypeScript ? isJsx : undefined,
+            decorators: tsconfigOptions.experimentalDecorators,
+          },
+          transform: {
+            decoratorMetadata: tsconfigOptions.emitDecoratorMetadata,
+            react: {
+              runtime: useReact17NewTransform ? 'automatic' : 'classic',
+              importSource: tsconfigOptions.jsxImportSource,
+              pragma: tsconfigOptions.jsxFactory,
+              pragmaFrag: tsconfigOptions.jsxFragmentFactory,
+              development: tsconfigOptions.jsx === 'react-jsxdev' ? true : undefined,
+            },
+          },
+          target: tsconfigOptions.target?.toLowerCase() as JscTarget | undefined,
+          baseUrl: tsconfigOptions.baseUrl,
+          paths: tsconfigOptions.paths,
+        },
+      }
+
+      const {
+        // @ts-expect-error -- We have to make sure that we don't pass these options to swc
+        filename: _1, // We will use `id` from rollup instead
+        include: _2, // Rollup's filter is incompatible with swc's filter
+        exclude: _3,
+        tsconfig: _4, // swc doesn't have tsconfig option
+        extensions: _5, // swc doesn't have extensions option
+        minify: _6, // We will disable minify during transform, and perform minify in renderChunk
+        ...restSwcOptions
+      } = options
+
+      const swcOption = deepmerge<SwcOptions[]>(swcOptionsFromTsConfig, restSwcOptions, {
+        jsc: {
+          minify: undefined, // Disable minify on transform, do it on renderChunk
+        },
+        filename: id,
+        minify: false, // Disable minify on transform, do it on renderChunk
+      })
+
+      return swcTransform(code, swcOption)
+    },
+
+    renderChunk(code: string) {
+      if (options.minify || options.jsc?.minify?.mangle || options.jsc?.minify?.compress) {
+        return swcMinify(code, options.jsc?.minify)
+      }
+
+      return null
+    },
+  }
+}
+
+function minify(options: JsMinifyOptions = {}): RollupPlugin {
+  return {
+    name: 'swc-minify',
+
+    renderChunk(code: string) {
+      return swcMinify(code, options)
+    },
+  }
+}
+
+function defineRollupSwcOption(option: PluginOptions) {
+  return option
+}
+
+export { defineRollupSwcOption, minify }

@@ -1,0 +1,121 @@
+name: Reusable Build
+
+permissions:
+  checks: write
+  pull-requests: write
+
+on:
+  workflow_call:
+    inputs:
+      target:
+        required: true
+        type: string
+      profile: # Rust profile, "debug" or "release"
+        default: 'release'
+        required: false
+        type: string
+      test: # Run tests?
+        type: boolean
+        required: false
+        default: true
+      ref: # Git reference to checkout
+        required: false
+        type: string
+
+jobs:
+  select:
+    name: Select Host
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+    outputs:
+      host: ${{ steps.run.outputs.host }}
+    steps:
+      - name: Choose Target for ${{ inputs.target }}
+        id: run
+        shell: bash
+        run: |
+          if [[ "${{ contains(inputs.target, 'linux') }}" == "true" ]]; then
+            echo "host=ubuntu-latest" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "${{ contains(inputs.target, 'windows') }}" == "true" ]]; then
+            echo "host=windows-latest" >> "$GITHUB_OUTPUT"
+          fi
+          if [[ "${{ contains(inputs.target, 'apple') }}" == "true" ]]; then
+            echo "host=macos-latest" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-swc:
+    name: Build
+    needs: select
+    runs-on: ${{ needs.select.outputs.host }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PNPM
+        uses: ./.github/actions/pnpm
+
+      - name: Install Rust Toolchain
+        uses: ./.github/actions/rustup
+        with:
+          clippy: true
+          fmt: true
+          shared-key: check
+          save-cache: true
+
+      - name: Run cargo check
+        run: cargo check
+
+      # Macos
+
+      - name: Build x86_64-apple-darwin
+        if: ${{ inputs.target == 'x86_64-apple-darwin' }}
+        run: pnpm run build:swc
+
+      - name: Build aarch64-apple-darwin
+        if: ${{ inputs.target == 'aarch64-apple-darwin' }}
+        run: pnpm run build:swc
+
+      # Linux
+
+      - name: Build x86_64-unknown-linux-gnu
+        if: ${{ inputs.target == 'x86_64-unknown-linux-gnu' }}
+        run: pnpm run build:swc
+
+      - name: Build aarch64-unknown-linux-gnu
+        if: ${{ inputs.target == 'aarch64-unknown-linux-gnu' }}
+        run: pnpm run build:swc
+
+      - name: Build x86_64-unknown-linux-musl
+        if: ${{ inputs.target == 'x86_64-unknown-linux-musl' }}
+        run: pnpm run build:swc
+
+      - name: Build aarch64-unknown-linux-musl
+        if: ${{ inputs.target == 'aarch64-unknown-linux-musl' }}
+        run: pnpm run build:swc
+
+      # Windows
+
+      - name: Build i686-pc-windows-msvc
+        if: ${{ inputs.target == 'i686-pc-windows-msvc' }}
+        run: pnpm run build:swc
+
+      - name: Build x86_64-pc-windows-msvc
+        if: ${{ inputs.target == 'x86_64-pc-windows-msvc' }}
+        run: pnpm run build:swc
+
+      - name: Build aarch64-pc-windows-msvc
+        if: ${{ inputs.target == 'aarch64-pc-windows-msvc' }}
+        run: pnpm run build:swc
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: swc
+          path: packages/swc/dist
+          if-no-files-found: error

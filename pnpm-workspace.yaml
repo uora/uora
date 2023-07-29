@@ -1,0 +1,12 @@
+packages:
+  # all packages in subdirs of packages/ and components/
+  - 'scripts'
+  - 'packages/**'
+  - '!packages/swc/crates/**'
+  - "npm/*"
+  - 'crates/*'
+  - 'examples/*'
+  - 'playground'
+  - 'docs'
+  # exclude packages that are inside test directories
+  - '!**/test/**'

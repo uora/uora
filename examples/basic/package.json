@@ -1,0 +1,16 @@
+{
+  "name": "@example/basic",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "uora build",
+    "dev": "uora dev",
+    "routes": "uora routes",
+    "start": "uora start",
+    "uora": "uora"
+  },
+  "devDependencies": {
+    "@uora/cli": "workspace:*",
+    "uorajs": "workspace:*"
+  }
+}

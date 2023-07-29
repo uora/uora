@@ -1,0 +1,19 @@
+[package]
+edition = "2021"
+name    = "uora-swc-napi"
+publish = false
+version = "0.0.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+napi        = { workspace = true }
+napi-derive = { workspace = true }
+
+[build-dependencies]
+napi-build = { workspace = true }
+
+[features]
+fs       = []
+parallel = []

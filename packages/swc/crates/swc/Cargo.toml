@@ -1,0 +1,18 @@
+[package]
+description = "uora swc"
+edition     = "2021"
+license     = "MIT"
+name        = "uora-swc"
+publish     = false
+repository  = "https://github.com/uora/uora"
+version     = "0.0.0"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi        = { workspace = true }
+napi-derive = { workspace = true }
+
+[build-dependencies]
+napi-build = { workspace = true }

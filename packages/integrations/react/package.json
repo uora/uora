@@ -1,0 +1,56 @@
+{
+  "name": "@uora/react",
+  "version": "0.0.0-alpha.0",
+  "description": "uora",
+  "keywords": [
+    "uora"
+  ],
+  "homepage": "https://uora.io",
+  "bugs": {
+    "url": "https://github.com/uora/uora/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uora/uora.git",
+    "directory": "packages/integrations/react"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "pnpm build --watch",
+    "prepack": "pnpm build"
+  },
+  "dependencies": {
+    "react-router-dom": "^6.14.2"
+  },
+  "devDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "peerDependencies": {
+    "react": ">=16.8",
+    "react-dom": ">=16.8"
+  },
+  "engines": {
+    "node": "^14.19.0 || >=16.10.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "authors": [
+    "Zack <lorenx@163.com> (https://github.com/loyep)"
+  ]
+}
