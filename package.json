@@ -6,7 +6,7 @@
   "scripts": {
     "bootstrap": "uora-scripts bootstrap",
     "build": "pnpm packages run build",
-    "build:swc": "pnpm -r --filter=\"@uora/swc\" build-swc",
+    "build:swc": "pnpm -r --filter=\"@uora/swc\" build",
     "changeset": "changeset",
     "changeset:publish": "changeset publish",
     "changeset:version": "pnpm build && changeset version && pnpm install --no-frozen-lockfile && pnpm format",
@@ -19,7 +19,7 @@
     "format": "uora-scripts format",
     "preinstall": "npx only-allow pnpm",
     "lint": "eslint packages --ext .ts",
-    "packages": "pnpm -r --filter=./packages/*",
+    "packages": "pnpm -r --filter=./packages/**",
     "play": "DEBUG=uora uora dev playground",
     "play:build": "uora build playground",
     "play:routes": "uora routes playground",

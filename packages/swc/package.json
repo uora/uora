@@ -15,14 +15,17 @@
     "directory": "packages/utils"
   },
   "license": "MIT",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "index.js",
+  "types": "index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "index.js",
+    "index.d.ts"
   ],
   "scripts": {
-    "build-swc": "napi build --cargo-cwd ./crates/napi --platform dist --release",
+    "build": "napi build --cargo-cwd ./crates/napi --platform dist --release",
     "build:debug": "napi build --platform dist",
+    "dev": "pnpm build",
     "prepublishOnly": "napi prepublish -t npm"
   },
   "devDependencies": {

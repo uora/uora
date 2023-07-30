@@ -15,9 +15,9 @@ This is still a **work in progress**. Many features are missing or incomplete. E
 
 ## Getting Started
 
-    ```bash
-    $ npm create uora@latest
-    ```
+```bash
+npm create uora@latest
+```
 
 To check out docs, visit [uora.io](https://uora.io).
 
