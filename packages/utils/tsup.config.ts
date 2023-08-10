@@ -9,8 +9,8 @@ export default defineConfig((opts) => [
     platform: 'node',
     skipNodeModulesBundle: true,
     tsconfig: './tsconfig.json',
+    legacyOutput: true,
     dts: true,
     clean: true,
-    outExtension: ({ format }) => ({ js: format === 'cjs' ? '.cjs' : '.mjs' }),
   },
 ])

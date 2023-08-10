@@ -8,11 +8,11 @@ export default defineConfig((opts) => [
     outDir: 'dist',
     platform: 'node',
     target: 'node14',
+    legacyOutput: true,
     skipNodeModulesBundle: true,
     tsconfig: './tsconfig.json',
     shims: true,
     dts: true,
     clean: true,
-    outExtension: ({ format }) => ({ js: format === 'cjs' ? '.cjs' : '.mjs' }),
   },
 ])

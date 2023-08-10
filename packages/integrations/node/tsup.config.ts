@@ -11,6 +11,6 @@ export default defineConfig((opts) => [
     tsconfig: './tsconfig.json',
     dts: true,
     clean: true,
-    outExtension: ({ format }) => ({ js: format === 'cjs' ? '.cjs' : '.mjs' }),
+    legacyOutput: true,
   },
 ])
