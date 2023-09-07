@@ -61,7 +61,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "happy-dom": "^10.9.0",
+    "happy-dom": "^11.0.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",
     "only-allow": "^1.1.1",
