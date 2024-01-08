@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@napi-rs/cli": "^2.16.2",
-    "@napi-rs/triples": "1.1.0"
+    "@napi-rs/triples": "1.2.0"
   },
   "engines": {
     "node": "^14.19.0 || >=16.10.0"
