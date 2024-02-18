@@ -30,7 +30,7 @@ runs:
 
     - name: Restore pnpm cache
       id: restore
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@v4
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
         key: node-cache-${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -42,7 +42,7 @@ runs:
       run: pnpm install --no-frozen-lockfile
 
     - name: Save pnpm cache
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       if: ${{ inputs.save-if == 'true' && steps.restore.outputs.cache-hit != 'true' }}
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
